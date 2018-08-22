@@ -1,4 +1,5 @@
-import Storage from './storage'
+import NluStorage from './providers/nlu'
+import MicrosoftQnaMakerStorage from './providers/microsoft_qna_maker'
 import { processEvent } from './middleware'
 import * as parsers from './parsers.js'
 import _ from 'lodash'
@@ -26,12 +27,14 @@ module.exports = {
   config: {
     qnaDir: { type: 'string', required: true, default: './qna', env: 'QNA_DIR' },
     textRenderer: { type: 'string', required: true, default: '#builtin_text', env: 'QNA_TEXT_RENDERER' },
-    exportCsvEncoding: { type: 'string', required: false, default: 'utf8', env: 'QNA_EXPORT_CSV_ENCODING' }
+    exportCsvEncoding: { type: 'string', required: false, default: 'utf8', env: 'QNA_EXPORT_CSV_ENCODING' },
+    microsoftQnaMakerApiKey: { type: 'string', required: false, env: 'MICROSOFT_QNA_MAKER_API_KEY' }
   },
   async init(bp, configurator) {
     const config = await configurator.loadAll()
+    const Storage = config.microsoftQnaMakerApiKey ? MicrosoftQnaMakerStorage : NluStorage
     storage = new Storage({ bp, config })
-    await storage.initializeGhost()
+    await storage.initialize()
 
     logger = bp.logger
 

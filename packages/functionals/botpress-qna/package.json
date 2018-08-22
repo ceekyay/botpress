@@ -55,6 +55,7 @@
     "webpack-node-externals": "^1.6.0"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "bluebird": "^3.5.1",
     "csv-parse": "^2.5.0",
     "iconv-lite": "^0.4.23",

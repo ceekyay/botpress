@@ -1,9 +1,9 @@
-import { NLU_PREFIX } from './storage'
+import { NLU_PREFIX } from './providers/nlu'
 
 export const processEvent = async (event, { bp, storage, logger, config }) => {
   // NB: we rely on NLU being loaded before we receive any event.
   // I'm not sure yet if we can guarantee it
-  if (!event.nlu || !event.nlu.intent || !event.nlu.intent.startsWith(NLU_PREFIX)) {
+  if (config.microsoftQnaMakerApiKey || !(event.nlu || {}).intent || !event.nlu.intent.startsWith(NLU_PREFIX)) {
     return false
   }
 

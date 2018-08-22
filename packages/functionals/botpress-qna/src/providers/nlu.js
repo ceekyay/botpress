@@ -3,6 +3,7 @@ import path from 'path'
 import _ from 'lodash'
 import Promise from 'bluebird'
 import generate from 'nanoid/generate'
+import axios from 'axios'
 
 const safeId = (length = 10) => generate('1234567890abcdefghijklmnopqrsuvwxyz', length)
 
@@ -34,9 +35,10 @@ export default class Storage {
     this.ghost = bp.ghostManager
     this.projectDir = bp.projectLocation
     this.qnaDir = config.qnaDir
+    this.microsoftQnaMakerApiKey = config.microsoftQnaMakerApiKey
   }
 
-  async initializeGhost() {
+  async initialize() {
     mkdirp.sync(path.resolve(this.projectDir, this.qnaDir))
     await this.ghost.addRootFolder(this.qnaDir, { filesGlob: '**/*.json' })
   }
@@ -86,6 +88,29 @@ export default class Storage {
     if (typeof limit !== 'undefined' && typeof offset !== 'undefined') {
       questions = questions.slice(offset, offset + limit)
     }
+
+    const host = 'https://westus.api.cognitive.microsoft.com'
+    const service = '/qnamaker/v4.0'
+    const method = '/knowledgebases/'
+
+    const { data: { knowledgebases } } = await axios({
+      url: service + method,
+      baseURL: host,
+      headers: {
+        'Ocp-Apim-Subscription-Key': this.microsoftQnaMakerApiKey
+      }
+    })
+
+    const { data } = await axios({
+      url: service + method + knowledgebases[0].id + '/test/qna/',
+      baseURL: host,
+      headers: {
+        'Ocp-Apim-Subscription-Key': this.microsoftQnaMakerApiKey
+      }
+    })
+
+    console.log('!!!!!!!!!!!!', data)
+
     return Promise.map(questions, question => this.getQuestion({ filename: question }))
   }
 
